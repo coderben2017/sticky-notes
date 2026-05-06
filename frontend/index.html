@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>便签</title>
+    <link rel="stylesheet" href="./src/style.css"/>
+</head>
+<body>
+    <div id="app">
+        <div id="titlebar" style="--wails-draggable:drag">
+            <div id="drag-region" style="--wails-draggable:drag"></div>
+            <div class="title" style="--wails-draggable:no-drag">便签</div>
+            <div class="controls" style="--wails-draggable:no-drag">
+                <button id="add-btn" title="新建便签">+</button>
+                <button id="pin-btn" title="固定置顶">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a2 2 0 1 1 0-4h-6a2 2 0 1 1 0 4v4.68a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
+                </button>
+                <button id="close-btn" title="隐藏到托盘">&times;</button>
+            </div>
+        </div>
+        <div id="content-container" style="--wails-draggable:no-drag">
+            <textarea id="note-content" placeholder="在这里输入内容..."></textarea>
+        </div>
+        
+        <!-- 自定义关闭确认弹窗 -->
+        <div id="close-dialog" class="dialog-overlay" style="display: none; --wails-draggable:no-drag">
+            <div class="dialog-box">
+                <div class="dialog-title">关闭便签</div>
+                <div class="dialog-content">请选择要执行的操作：</div>
+                <div class="dialog-footer">
+                    <button id="dialog-hide-btn" class="btn btn-primary">隐藏到托盘</button>
+                    <button id="dialog-quit-btn" class="btn btn-danger">完全退出</button>
+                    <button id="dialog-cancel-btn" class="btn btn-cancel">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>

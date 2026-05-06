@@ -1,0 +1,22 @@
+# Wails build
+build/bin/
+build/obj/
+*.exe
+wails-sticky.exe
+
+# 运行产生的本地便签数据
+note_*.txt
+
+# Go
+vendor/
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
