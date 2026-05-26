@@ -4,6 +4,11 @@
     padding: 0;
 }
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 body, html {
     width: 100%;
     height: 100%;
@@ -22,7 +27,7 @@ body, html {
 }
 
 #titlebar {
-    height: 36px;
+    height: 40px;
     background-color: #f6eea1;
     display: flex;
     justify-content: space-between;
@@ -30,6 +35,7 @@ body, html {
     position: relative;
     padding: 0 10px;
     user-select: none;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.04);
 }
 
 #drag-region {
@@ -43,8 +49,8 @@ body, html {
 
 .title {
     font-size: 16px;
-    color: #666;
-    font-weight: bold;
+    color: #333;
+    font-weight: 600;
     z-index: 1;
 }
 
@@ -56,13 +62,13 @@ body, html {
 }
 
 .controls button {
-    background: none;
+    background: transparent;
     border: none;
-    font-size: 20px;
+    font-size: 18px;
     cursor: pointer;
-    color: #666;
-    padding: 2px 6px;
-    border-radius: 4px;
+    color: #555;
+    padding: 6px;
+    border-radius: 6px;
 }
 
 .controls button:hover {
@@ -86,8 +92,8 @@ body, html {
     border: none;
     resize: none;
     outline: none;
-    font-size: 20px;
-    color: #333;
+    font-size: 18px;
+    color: #222;
     line-height: 1.6;
 }
 

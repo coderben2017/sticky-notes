@@ -6,21 +6,37 @@
     <title>便签</title>
     <link rel="stylesheet" href="./src/style.css"/>
 </head>
-<body>
-    <div id="app">
-        <div id="titlebar" style="--wails-draggable:drag">
+<body class="antialiased">
+    <div id="app" class="flex flex-col w-screen h-screen bg-yellow-50 border border-yellow-200">
+        <div id="titlebar" class="h-10 flex items-center justify-between px-3" style="--wails-draggable:drag">
             <div id="drag-region" style="--wails-draggable:drag"></div>
-            <div class="title" style="--wails-draggable:no-drag">便签</div>
-            <div class="controls" style="--wails-draggable:no-drag">
-                <button id="add-btn" title="新建便签">+</button>
-                <button id="pin-btn" title="固定置顶">
+            <div class="title text-sm font-semibold text-gray-800" style="--wails-draggable:no-drag">便签</div>
+            <div class="controls flex items-center gap-2" style="--wails-draggable:no-drag">
+                <button id="add-btn" class="p-1 rounded hover:bg-gray-100" title="新建便签">+</button>
+                <button id="todo-btn" class="p-1 rounded hover:bg-gray-100" title="切换待办模式">☑</button>
+                <button id="pin-btn" class="p-1 rounded hover:bg-gray-100" title="固定置顶">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.68V6a2 2 0 1 1 0-4h-6a2 2 0 1 1 0 4v4.68a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>
                 </button>
-                <button id="close-btn" title="隐藏到托盘">&times;</button>
+                <button id="close-btn" class="p-1 rounded hover:bg-red-500 hover:text-white" title="隐藏到托盘">&times;</button>
             </div>
         </div>
-        <div id="content-container" style="--wails-draggable:no-drag">
-            <textarea id="note-content" placeholder="在这里输入内容..."></textarea>
+        <div id="content-container" class="flex-1 p-3" style="--wails-draggable:no-drag">
+            <textarea id="note-content" class="w-full h-full bg-transparent text-base text-gray-900 resize-none outline-none" placeholder="在这里输入内容..."></textarea>
+        </div>
+        <!-- 待办列表与归档（默认隐藏） -->
+        <div id="todo-container" class="p-3" style="display: none; --wails-draggable:no-drag">
+            <div id="todo-header" class="flex items-center gap-2 mb-3">
+                <input id="todo-input" class="flex-1 px-3 py-2 rounded border border-gray-200 text-sm" placeholder="添加新任务，按 Enter 提交" />
+                <button id="todo-add-btn" class="px-3 py-2 bg-blue-500 text-white rounded text-sm">添加</button>
+            </div>
+            <ul id="todo-list" class="space-y-2"></ul>
+            <div id="archive" class="mt-4" style="display:none">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-medium text-gray-700">历史</h4>
+                    <button id="clear-archive-btn" class="text-xs text-red-500 hover:underline">清空</button>
+                </div>
+                <ul id="archive-list" class="mt-2 space-y-1 text-sm text-gray-600"></ul>
+            </div>
         </div>
         
         <!-- 自定义关闭确认弹窗 -->

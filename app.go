@@ -140,6 +140,42 @@ func (a *App) LoadNote() string {
 	return string(data)
 }
 
+// SaveTitle 持久化便签标题到独立文件
+func (a *App) SaveTitle(title string) {
+	exePath, _ := os.Executable()
+	dir := filepath.Dir(exePath)
+	_ = os.WriteFile(filepath.Join(dir, a.noteID+".title"), []byte(title), 0644)
+}
+
+// LoadTitle 从持久化文件读取便签标题，若不存在则返回默认标题
+func (a *App) LoadTitle() string {
+	exePath, _ := os.Executable()
+	dir := filepath.Dir(exePath)
+	data, err := os.ReadFile(filepath.Join(dir, a.noteID+".title"))
+	if err != nil {
+		return a.GetNoteTitle()
+	}
+	return string(data)
+}
+
+// SaveArchive 将已完成的待办项归档保存
+func (a *App) SaveArchive(archive string) {
+	exePath, _ := os.Executable()
+	dir := filepath.Dir(exePath)
+	_ = os.WriteFile(filepath.Join(dir, a.noteID+".archive.txt"), []byte(archive), 0644)
+}
+
+// LoadArchive 读取归档内容
+func (a *App) LoadArchive() string {
+	exePath, _ := os.Executable()
+	dir := filepath.Dir(exePath)
+	data, err := os.ReadFile(filepath.Join(dir, a.noteID+".archive.txt"))
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
+
 func (a *App) GetNoteTitle() string {
 	if a.noteIndex == 1 {
 		return "便签"

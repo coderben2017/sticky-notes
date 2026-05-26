@@ -5,12 +5,20 @@ export function GetNoteTitle():Promise<string>;
 
 export function HideWindow():Promise<void>;
 
+export function LoadArchive():Promise<string>;
+
 export function LoadNote():Promise<string>;
+
+export function LoadTitle():Promise<string>;
 
 export function NewNote():Promise<void>;
 
 export function QuitApp():Promise<void>;
 
+export function SaveArchive(arg1:string):Promise<void>;
+
 export function SaveNote(arg1:string):Promise<void>;
+
+export function SaveTitle(arg1:string):Promise<void>;
 
 export function TogglePin():Promise<boolean>;

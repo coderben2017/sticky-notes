@@ -10,8 +10,16 @@ export function HideWindow() {
   return window['go']['main']['App']['HideWindow']();
 }
 
+export function LoadArchive() {
+  return window['go']['main']['App']['LoadArchive']();
+}
+
 export function LoadNote() {
   return window['go']['main']['App']['LoadNote']();
+}
+
+export function LoadTitle() {
+  return window['go']['main']['App']['LoadTitle']();
 }
 
 export function NewNote() {
@@ -22,8 +30,16 @@ export function QuitApp() {
   return window['go']['main']['App']['QuitApp']();
 }
 
+export function SaveArchive(arg1) {
+  return window['go']['main']['App']['SaveArchive'](arg1);
+}
+
 export function SaveNote(arg1) {
   return window['go']['main']['App']['SaveNote'](arg1);
+}
+
+export function SaveTitle(arg1) {
+  return window['go']['main']['App']['SaveTitle'](arg1);
 }
 
 export function TogglePin() {
