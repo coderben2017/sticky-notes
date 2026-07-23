@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>Sticky Notes</title>
+    <link rel="stylesheet" href="views://mainview/styles.css">
+    <script src="views://mainview/index.js" defer></script>
+  </head>
+  <body>
+    <main id="app" class="app-shell" aria-busy="true">
+      <header id="titlebar" class="titlebar electrobun-webkit-app-region-drag">
+        <button id="title-btn" class="note-title electrobun-webkit-app-region-no-drag" type="button" title="双击编辑标题">
+          <span id="title-text">便签</span>
+        </button>
+        <input id="title-input" class="title-input electrobun-webkit-app-region-no-drag" maxlength="80" aria-label="便签标题" hidden>
+        <nav class="window-actions electrobun-webkit-app-region-no-drag" aria-label="窗口操作">
+          <button id="new-note-btn" class="icon-btn" type="button" title="新建便签" aria-label="新建便签">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <button id="mode-btn" class="icon-btn" type="button" title="切换待办模式" aria-label="切换待办模式">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 3 3 6-7M13 6h6M13 12h6M5 19h14"/></svg>
+          </button>
+          <button id="pin-btn" class="icon-btn" type="button" title="固定置顶" aria-label="固定置顶">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v5M5 17h14v-1.8a2 2 0 0 0-1.1-1.8l-1.8-.9a2 2 0 0 1-1.1-1.8V6a2 2 0 1 1 0-4H9a2 2 0 1 1 0 4v4.7a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2Z"/></svg>
+          </button>
+          <button id="close-btn" class="icon-btn close-btn" type="button" title="隐藏到托盘" aria-label="关闭">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+        </nav>
+      </header>
+
+      <section id="note-view" class="content-view">
+        <textarea id="note-content" aria-label="便签内容" placeholder="写点什么……" spellcheck="false"></textarea>
+        <div id="save-state" class="save-state" role="status">已保存</div>
+      </section>
+
+      <section id="todo-view" class="todo-view" hidden>
+        <form id="todo-form" class="todo-form">
+          <input id="todo-input" maxlength="500" autocomplete="off" placeholder="添加一项待办">
+          <button class="add-todo-btn" type="submit" aria-label="添加待办">添加</button>
+        </form>
+        <ul id="todo-list" class="item-list" aria-label="待办列表"></ul>
+        <section id="archive-section" class="archive-section" hidden>
+          <header class="section-heading">
+            <span>已完成</span>
+            <button id="clear-archive-btn" class="text-btn danger" type="button">清空</button>
+          </header>
+          <ul id="archive-list" class="item-list archive-list" aria-label="已完成列表"></ul>
+        </section>
+      </section>
+
+      <div id="close-dialog" class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="dialog-title" hidden>
+        <section class="dialog-card">
+          <div class="dialog-mark" aria-hidden="true">×</div>
+          <h2 id="dialog-title">关闭便签</h2>
+          <p>可隐藏到托盘；删除后便签内容无法恢复。</p>
+          <div class="dialog-actions">
+            <button id="hide-btn" class="primary-btn" type="button">隐藏到托盘</button>
+            <button id="delete-note-btn" class="danger-btn" type="button">删除此便签</button>
+            <button id="cancel-btn" class="secondary-btn" type="button">取消</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="resize-handles electrobun-webkit-app-region-no-drag" aria-hidden="true">
+        <div class="resize-handle resize-handle-top" data-resize-edge="top"></div>
+        <div class="resize-handle resize-handle-right" data-resize-edge="right"></div>
+        <div class="resize-handle resize-handle-bottom" data-resize-edge="bottom"></div>
+        <div class="resize-handle resize-handle-left" data-resize-edge="left"></div>
+        <div class="resize-handle resize-handle-top-left" data-resize-edge="top-left"></div>
+        <div class="resize-handle resize-handle-top-right" data-resize-edge="top-right"></div>
+        <div class="resize-handle resize-handle-bottom-right" data-resize-edge="bottom-right"></div>
+        <div class="resize-handle resize-handle-bottom-left" data-resize-edge="bottom-left"></div>
+      </div>
+    </main>
+  </body>
+</html>

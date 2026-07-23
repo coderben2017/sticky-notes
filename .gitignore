@@ -1,0 +1,20 @@
+# Electrobun dependencies and caches
+node_modules/
+
+# Electrobun build outputs
+dist/
+artifacts/
+.inspect-package/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Legacy Wails note data retained for one-time import
+build/bin/note*.txt
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
