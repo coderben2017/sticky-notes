@@ -5,6 +5,7 @@ node_modules/
 dist/
 artifacts/
 .inspect-package/
+.tools/
 
 # Logs and temporary files
 *.log

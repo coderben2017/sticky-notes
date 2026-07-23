@@ -1,12 +1,13 @@
 {
   "name": "sticky-notes",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "electrobun dev",
     "build": "electrobun build --env=stable",
     "build:dev": "electrobun build --env=dev",
+    "package:win": "powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

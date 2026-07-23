@@ -680,11 +680,10 @@ export const createWindowManager = ({ repository, onNotesChanged }: WindowManage
             resizeStates.delete(noteId);
             draggingNotes.delete(noteId);
             dockStates.delete(noteId);
-            const replacement = repository.remove(noteId);
+            repository.remove(noteId);
             onNotesChanged();
 
             setTimeout(() => {
-              if (replacement) open(replacement.id);
               window.close();
             }, 100);
             return null;

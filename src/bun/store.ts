@@ -140,7 +140,6 @@ const parseState = (raw: string): RepositoryState => {
   }));
   const noteOrder = value.noteOrder.filter((id) => Boolean(notes[id]));
 
-  if (noteOrder.length === 0) throw new Error("便签数据中没有有效记录");
   return { version: 1, noteOrder, notes };
 };
 
@@ -235,13 +234,6 @@ export const createNoteRepository = (
       requireNote(id);
       const { [id]: _removed, ...remainingNotes } = state.notes;
       const noteOrder = state.noteOrder.filter((noteId) => noteId !== id);
-      let replacement: StoredNote | undefined;
-
-      if (noteOrder.length === 0) {
-        replacement = createDefaultNote(1);
-        noteOrder.push(replacement.id);
-        remainingNotes[replacement.id] = replacement;
-      }
 
       state = {
         ...state,
@@ -249,7 +241,7 @@ export const createNoteRepository = (
         notes: remainingNotes,
       };
       persist();
-      return replacement ? toSnapshot(replacement) : null;
+      return null;
     },
 
     saveContent: (id: string, content: string) => commit(id, (note) => ({ ...note, content })),

@@ -4,7 +4,7 @@ export default {
   app: {
     name: "Sticky Notes",
     identifier: "com.coderben2017.sticky-notes",
-    version: "1.1.0",
+    version: "1.1.1",
     description: "轻量、常驻桌面的多窗口便签与待办工具",
   },
   build: {

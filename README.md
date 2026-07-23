@@ -10,7 +10,7 @@
 - 正文输入后自动保存，隐藏或退出应用前会刷新待保存内容
 - 双击编辑便签标题，并同步更新窗口标题和托盘便签列表
 - 单独置顶或取消置顶任意便签
-- 单独隐藏到托盘或永久删除当前便签；删除最后一个便签时自动创建空白便签
+- 单独隐藏到托盘或永久删除当前便签；删除最后一个便签后可从托盘重新新建
 
 ### 待办
 
@@ -71,11 +71,13 @@ npm run typecheck
 
 ## 构建
 
+生成 Windows x64 单文件安装程序：
+
 ```bash
-npm run build
+npm run package:win
 ```
 
-构建目录为 `dist/`，可分发产物目录为 `artifacts/`。
+安装程序输出为 `artifacts/StickyNotes-Setup-x64.exe`。首次打包需要在项目的 `.tools/inno/compiler/` 目录准备 Inno Setup 7 编译器。
 
 ## 快捷键
 
