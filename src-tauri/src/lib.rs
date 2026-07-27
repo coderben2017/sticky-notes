@@ -7,7 +7,8 @@ mod windows;
 
 use std::{
     collections::HashSet,
-    path::PathBuf,
+    fs,
+    path::{Path, PathBuf},
     sync::{
         atomic::{AtomicBool, Ordering},
         Mutex,
@@ -69,6 +70,11 @@ pub fn run() {
                 .app_local_data_dir()?
                 .join(channel)
                 .join("notes.json");
+            NoteRepository::migrate_existing_state(
+                &data_path,
+                &legacy_repository_paths(app.handle(), channel),
+            )
+            .map_err(std::io::Error::other)?;
             let repository = NoteRepository::load(data_path, &legacy_content_paths())
                 .map_err(std::io::Error::other)?;
             app.manage(AppState::new(repository));
@@ -91,6 +97,36 @@ pub fn run() {
             }
         }
     });
+}
+
+fn legacy_repository_paths(app: &tauri::AppHandle, channel: &str) -> Vec<PathBuf> {
+    let roots = [app.path().local_data_dir(), app.path().data_dir()];
+    let mut paths = Vec::new();
+    for root in roots.into_iter().flatten() {
+        let Ok(entries) = fs::read_dir(root) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !path.is_dir() || !is_legacy_data_directory(&path) {
+                continue;
+            }
+            paths.push(path.join(channel).join("notes.json"));
+            paths.push(path.join("notes.json"));
+        }
+    }
+    paths
+}
+
+fn is_legacy_data_directory(path: &Path) -> bool {
+    let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+        return false;
+    };
+    let name = name.to_ascii_lowercase();
+    name.ends_with(".sticky-notes")
+        || name == "sticky notes"
+        || name == "sticky-notes"
+        || name == "stickynotes"
 }
 
 fn legacy_content_paths() -> Vec<PathBuf> {

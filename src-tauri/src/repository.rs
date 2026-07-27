@@ -17,6 +17,23 @@ pub struct NoteRepository {
 }
 
 impl NoteRepository {
+    pub fn migrate_existing_state(path: &Path, candidates: &[PathBuf]) -> Result<(), String> {
+        if path.exists() {
+            return Ok(());
+        }
+        let Some(source) = candidates
+            .iter()
+            .find(|candidate| *candidate != path && read_state(candidate).is_ok())
+        else {
+            return Ok(());
+        };
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).map_err(|error| format!("创建数据目录失败: {error}"))?;
+        }
+        fs::copy(source, path).map_err(|error| format!("迁移旧版便签数据失败: {error}"))?;
+        Ok(())
+    }
+
     pub fn load(path: PathBuf, legacy_content_paths: &[PathBuf]) -> Result<Self, String> {
         if let Some(parent) = path.parent() {
             fs::create_dir_all(parent).map_err(|error| format!("创建数据目录失败: {error}"))?;

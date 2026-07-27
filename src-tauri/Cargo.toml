@@ -2,7 +2,7 @@
 name = "sticky-notes"
 version = "1.2.0"
 description = "轻量、常驻桌面的多窗口便签与待办工具"
-authors = ["coderben2017"]
+authors = ["Sticky Notes Contributors"]
 edition = "2021"
 
 [lib]

@@ -82,13 +82,13 @@ src-tauri/
 
 当前 Tauri 2 NSIS 安装包比旧版 Electrobun 安装包缩小约 92.7%。这里没有把启动时间或内存写成绝对数值，因为未在相同机器、相同窗口数量下做统一基准；实际占用通常由 WebView2 页面和打开的便签窗口数量主导。
 
-生产数据继续保存在原 Electrobun 稳定版目录：
+生产数据保存在应用本地数据目录：
 
 ```text
-%LOCALAPPDATA%\com.coderben2017.sticky-notes\stable\notes.json
+%LOCALAPPDATA%\com.stickynotes.desktop\stable\notes.json
 ```
 
-开发环境使用同目录下的 `dev/notes.json`，不会覆盖生产数据。
+开发环境使用同目录下的 `dev/notes.json`，不会覆盖生产数据。首次启动新版本时会自动发现并迁移旧版 Sticky Notes 数据文件。
 
 ## 下载与安装
 
