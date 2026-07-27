@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light">
     <title>Sticky Notes</title>
-    <link rel="stylesheet" href="views://mainview/styles.css">
-    <script src="views://mainview/index.js" defer></script>
+    <link rel="stylesheet" href="./styles.css">
+    <script type="module" src="./index.ts"></script>
   </head>
   <body>
     <main id="app" class="app-shell" aria-busy="true">
-      <header id="titlebar" class="titlebar electrobun-webkit-app-region-drag">
-        <button id="title-btn" class="note-title electrobun-webkit-app-region-no-drag" type="button" title="双击编辑标题">
+      <header id="titlebar" class="titlebar">
+        <button id="title-btn" class="note-title tauri-no-drag" type="button" title="双击编辑标题">
           <span id="title-text">便签</span>
         </button>
-        <input id="title-input" class="title-input electrobun-webkit-app-region-no-drag" maxlength="80" aria-label="便签标题" hidden>
-        <nav class="window-actions electrobun-webkit-app-region-no-drag" aria-label="窗口操作">
+        <input id="title-input" class="title-input tauri-no-drag" maxlength="80" aria-label="便签标题" hidden>
+        <nav class="window-actions tauri-no-drag" aria-label="窗口操作">
           <button id="new-note-btn" class="icon-btn" type="button" title="新建便签" aria-label="新建便签">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           </button>
@@ -64,7 +64,19 @@
         </section>
       </div>
 
-      <div class="resize-handles electrobun-webkit-app-region-no-drag" aria-hidden="true">
+      <div id="todo-import-dialog" class="dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="todo-import-title" hidden>
+        <section class="dialog-card">
+          <div class="dialog-mark" aria-hidden="true">✓</div>
+          <h2 id="todo-import-title"></h2>
+          <p id="todo-import-description"></p>
+          <div class="dialog-actions">
+            <button id="todo-import-confirm-btn" class="primary-btn" type="button"></button>
+            <button id="todo-import-skip-btn" class="secondary-btn" type="button"></button>
+          </div>
+        </section>
+      </div>
+
+      <div class="resize-handles tauri-no-drag" aria-hidden="true">
         <div class="resize-handle resize-handle-top" data-resize-edge="top"></div>
         <div class="resize-handle resize-handle-right" data-resize-edge="right"></div>
         <div class="resize-handle resize-handle-bottom" data-resize-edge="bottom"></div>

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Sticky Notes",
+  "version": "1.2.0",
+  "identifier": "com.coderben2017.sticky-notes",
+  "build": {
+    "beforeDevCommand": "npm run dev:web",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build:web",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "useLocalToolsDir": true,
+    "category": "Productivity",
+    "shortDescription": "轻量多窗口桌面便签与待办工具",
+    "longDescription": "支持多便签、待办、托盘、窗口置顶以及屏幕边缘自动收缩。",
+    "icon": [
+      "../build/icon-32.png",
+      "../build/icon-128.png",
+      "../build/icon-256.png",
+      "../build/windows/icon.ico"
+    ],
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": ["English", "SimpChinese"],
+        "installerIcon": "../build/windows/icon.ico",
+        "uninstallerIcon": "../build/windows/icon.ico"
+      }
+    }
+  }
+}

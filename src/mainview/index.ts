@@ -1,6 +1,22 @@
-import type { NoteSnapshot, ResizeEdge, ScreenPoint } from "../shared/contracts";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import type { NoteSnapshot } from "../shared/contracts";
 import { button, byId, clear, emptyState, text } from "./dom";
-import { noteApi, noteMessages, onNoteChanged, registerFlushHandler } from "./rpc";
+import { t } from "./i18n";
+import { noteApi, noteMessages, registerFlushHandler } from "./rpc";
+
+const appWindow = getCurrentWindow();
+const resizeDirections = {
+  top: "North",
+  right: "East",
+  bottom: "South",
+  left: "West",
+  "top-left": "NorthWest",
+  "top-right": "NorthEast",
+  "bottom-right": "SouthEast",
+  "bottom-left": "SouthWest",
+} as const;
+
+type ResizeEdge = keyof typeof resizeDirections;
 
 const elements = {
   app: byId<HTMLElement>("app"),
@@ -26,6 +42,11 @@ const elements = {
   hideButton: byId<HTMLButtonElement>("hide-btn"),
   deleteNoteButton: byId<HTMLButtonElement>("delete-note-btn"),
   cancelButton: byId<HTMLButtonElement>("cancel-btn"),
+  todoImportDialog: byId<HTMLElement>("todo-import-dialog"),
+  todoImportTitle: byId<HTMLElement>("todo-import-title"),
+  todoImportDescription: byId<HTMLElement>("todo-import-description"),
+  todoImportConfirmButton: byId<HTMLButtonElement>("todo-import-confirm-btn"),
+  todoImportSkipButton: byId<HTMLButtonElement>("todo-import-skip-btn"),
 };
 const resizeHandles = Array.from(document.querySelectorAll<HTMLElement>("[data-resize-edge]"));
 
@@ -43,10 +64,17 @@ let isEditingTitle = false;
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let contentRevision = 0;
 let saveQueue: Promise<void> = Promise.resolve();
-let activeResizePointerId: number | null = null;
-let pendingResizePoint: ScreenPoint | null = null;
-let resizeAnimationFrame: number | undefined;
 let isWindowDragging = false;
+let isWindowResizing = false;
+let todoImportPromise: Promise<TodoImportDecision> | null = null;
+let resolveTodoImport: ((decision: TodoImportDecision) => void) | null = null;
+
+type TodoImportDecision = "copy" | "skip" | "cancel";
+
+elements.todoImportTitle.textContent = t("todoImportTitle");
+elements.todoImportDescription.textContent = t("todoImportDescription");
+elements.todoImportConfirmButton.textContent = t("todoImportConfirm");
+elements.todoImportSkipButton.textContent = t("todoImportSkip");
 
 const setSaveState = (message: string, state: "idle" | "saving" | "error" = "idle") => {
   elements.saveState.textContent = message;
@@ -211,9 +239,38 @@ const renderTodoMode = (enabled: boolean, focus: boolean) => {
   }
 };
 
+const finishTodoImport = (decision: TodoImportDecision) => {
+  if (!resolveTodoImport) return;
+  const resolve = resolveTodoImport;
+  resolveTodoImport = null;
+  todoImportPromise = null;
+  elements.todoImportDialog.hidden = true;
+  resolve(decision);
+};
+
+const requestTodoImport = () => {
+  if (todoImportPromise) return todoImportPromise;
+  elements.todoImportDialog.hidden = false;
+  elements.todoImportConfirmButton.focus();
+  todoImportPromise = new Promise<TodoImportDecision>((resolve) => {
+    resolveTodoImport = resolve;
+  });
+  return todoImportPromise;
+};
+
 const setTodoMode = async (enabled: boolean) => {
   if (todoMode === enabled) return;
-  const next = await run(() => noteApi.setTodoMode({ enabled }));
+  let copyContent = false;
+  if (enabled && snapshot.todos.length === 0) {
+    await flushPendingContent();
+    if (elements.noteContent.value.trim()) {
+      const decision = await requestTodoImport();
+      if (decision === "cancel") return;
+      copyContent = decision === "copy";
+    }
+  }
+
+  const next = await run(() => noteApi.setTodoMode({ enabled, copyContent }));
   updateSnapshot(next);
   renderTodoMode(next.todoMode, true);
 };
@@ -300,57 +357,37 @@ const deleteNote = async () => {
   await noteApi.deleteNote({});
 };
 
-const flushResizeUpdate = () => {
-  if (resizeAnimationFrame !== undefined) {
-    cancelAnimationFrame(resizeAnimationFrame);
-    resizeAnimationFrame = undefined;
-  }
-  if (!pendingResizePoint) return;
-  noteMessages.resizeWindow(pendingResizePoint);
-  pendingResizePoint = null;
-};
-
-const scheduleResizeUpdate = (point: ScreenPoint) => {
-  pendingResizePoint = point;
-  if (resizeAnimationFrame !== undefined) return;
-  resizeAnimationFrame = requestAnimationFrame(flushResizeUpdate);
-};
-
-const finishResize = (event: PointerEvent) => {
-  if (activeResizePointerId !== event.pointerId) return;
-  activeResizePointerId = null;
-  flushResizeUpdate();
-  noteMessages.endResize({});
-};
-
 const bindResizeEvents = () => {
   resizeHandles.forEach((handle) => {
-    const edge = handle.dataset.resizeEdge as ResizeEdge;
+    const edge = handle.dataset.resizeEdge;
+    if (!edge || !(edge in resizeDirections)) return;
 
-    handle.addEventListener("pointerdown", (event) => {
-      if (event.button !== 0 || activeResizePointerId !== null) return;
+    handle.addEventListener("pointerdown", async (event) => {
+      if (event.button !== 0 || isWindowResizing) return;
       event.preventDefault();
       event.stopPropagation();
-      activeResizePointerId = event.pointerId;
-      handle.setPointerCapture(event.pointerId);
-      noteMessages.startResize({ edge, screenX: event.screenX, screenY: event.screenY });
+      isWindowResizing = true;
+      void noteMessages.setWindowResizing({ resizing: true }).catch(console.error);
+      try {
+        await appWindow.startResizeDragging(resizeDirections[edge as ResizeEdge]);
+      } finally {
+        isWindowResizing = false;
+        void noteMessages.setWindowResizing({ resizing: false }).catch(console.error);
+      }
     });
-
-    handle.addEventListener("pointermove", (event) => {
-      if (activeResizePointerId !== event.pointerId) return;
-      scheduleResizeUpdate({ screenX: event.screenX, screenY: event.screenY });
-    });
-
-    handle.addEventListener("pointerup", finishResize);
-    handle.addEventListener("pointercancel", finishResize);
-    handle.addEventListener("lostpointercapture", finishResize);
   });
 };
 
-const setWindowDragging = (dragging: boolean) => {
-  if (isWindowDragging === dragging) return;
-  isWindowDragging = dragging;
-  noteMessages.setWindowDragging({ dragging });
+const startWindowDragging = async () => {
+  if (isWindowDragging) return;
+  isWindowDragging = true;
+  void noteMessages.setWindowDragging({ dragging: true }).catch(console.error);
+  try {
+    await appWindow.startDragging();
+  } finally {
+    isWindowDragging = false;
+    void noteMessages.setWindowDragging({ dragging: false }).catch(console.error);
+  }
 };
 
 const bindEvents = () => {
@@ -360,19 +397,18 @@ const bindEvents = () => {
     const target = event.target;
     if (event.button !== 0
       || !(target instanceof Element)
-      || target.closest(".electrobun-webkit-app-region-no-drag")) {
+      || target.closest(".tauri-no-drag")) {
       return;
     }
-    setWindowDragging(true);
+    event.preventDefault();
+    void startWindowDragging();
   });
 
-  window.addEventListener("pointerup", () => setWindowDragging(false));
-  window.addEventListener("pointercancel", () => setWindowDragging(false));
   document.documentElement.addEventListener("mouseenter", () => {
-    noteMessages.setDockHovered({ hovered: true });
+    void noteMessages.setDockHovered({ hovered: true });
   });
   document.documentElement.addEventListener("mouseleave", () => {
-    noteMessages.setDockHovered({ hovered: false });
+    void noteMessages.setDockHovered({ hovered: false });
   });
 
   elements.titleButton.addEventListener("dblclick", beginTitleEdit);
@@ -418,10 +454,17 @@ const bindEvents = () => {
   elements.closeDialog.addEventListener("click", (event) => {
     if (event.target === elements.closeDialog) setDialogOpen(false);
   });
+  elements.todoImportConfirmButton.addEventListener("click", () => finishTodoImport("copy"));
+  elements.todoImportSkipButton.addEventListener("click", () => finishTodoImport("skip"));
+  elements.todoImportDialog.addEventListener("click", (event) => {
+    if (event.target === elements.todoImportDialog) finishTodoImport("cancel");
+  });
 
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      if (!elements.closeDialog.hidden) {
+      if (!elements.todoImportDialog.hidden) {
+        finishTodoImport("cancel");
+      } else if (!elements.closeDialog.hidden) {
         setDialogOpen(false);
       } else if (todoMode) {
         void setTodoMode(false);
@@ -442,9 +485,6 @@ const bindEvents = () => {
 
 const bootstrap = async () => {
   registerFlushHandler(flushPendingContent);
-  onNoteChanged((next) => {
-    if (isReady) updateSnapshot(next);
-  });
 
   try {
     const initial = await run(() => noteApi.bootstrap({}));

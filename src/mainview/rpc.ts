@@ -1,6 +1,6 @@
-import { Electroview } from "electrobun/view";
+import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type {
-  EmptyParams,
   NoteApi,
   NoteMessageApi,
   NoteMessageName,
@@ -8,58 +8,46 @@ import type {
   NoteRequestName,
   NoteRequestParams,
   NoteRequestResponse,
-  NoteSnapshot,
-  StickyNotesRPC,
 } from "../shared/contracts";
-import {
-  decodeWireValue,
-  encodeWireValue,
-  type WireValue,
-} from "../shared/wire";
 
-type SnapshotListener = (snapshot: NoteSnapshot) => void;
 type FlushHandler = () => Promise<void>;
 
-const listeners = new Set<SnapshotListener>();
+const REQUEST_COMMANDS: Record<NoteRequestName, string> = {
+  bootstrap: "bootstrap",
+  saveContent: "save_content",
+  renameNote: "rename_note",
+  createNote: "create_note",
+  togglePin: "toggle_pin",
+  setTodoMode: "set_todo_mode",
+  hideWindow: "hide_window",
+  deleteNote: "delete_note",
+  addTodo: "add_todo",
+  updateTodo: "update_todo",
+  deleteTodo: "delete_todo",
+  completeTodo: "complete_todo",
+  restoreTodo: "restore_todo",
+  deleteArchivedTodo: "delete_archived_todo",
+  clearArchive: "clear_archive",
+};
+
+const MESSAGE_COMMANDS: Record<NoteMessageName, string> = {
+  setWindowDragging: "set_window_dragging",
+  setWindowResizing: "set_window_resizing",
+  setDockHovered: "set_dock_hovered",
+};
+
 let flushPendingChanges: FlushHandler = async () => {};
+let flushListenerRegistered = false;
 
-const rpc = Electroview.defineRPC<StickyNotesRPC>({
-  maxRequestTime: 5000,
-  handlers: {
-    requests: {
-      flushPendingChanges: async (payload) => {
-        decodeWireValue<EmptyParams>(payload);
-        await flushPendingChanges();
-        return encodeWireValue(null);
-      },
-    },
-    messages: {
-      noteChanged: (payload) => {
-        const snapshot = decodeWireValue<NoteSnapshot>(payload);
-        listeners.forEach((listener) => listener(snapshot));
-      },
-    },
-  },
-});
-
-const electroview = new Electroview({ rpc });
-type RawRequest = (payload: WireValue<unknown>) => Promise<WireValue<unknown>>;
-const rawRequests = electroview.rpc!.request as unknown as Record<NoteRequestName, RawRequest>;
-type RawMessage = (payload: WireValue<unknown>) => void;
-const rawMessages = electroview.rpc!.send as unknown as Record<NoteMessageName, RawMessage>;
-
-const defineRequest = <Name extends NoteRequestName>(name: Name) => async (
+const defineRequest = <Name extends NoteRequestName>(name: Name) => (
   params: NoteRequestParams<Name>,
 ): Promise<NoteRequestResponse<Name>> => {
-  const response = await rawRequests[name](encodeWireValue(params));
-  return decodeWireValue(response as WireValue<NoteRequestResponse<Name>>);
+  return invoke<NoteRequestResponse<Name>>(REQUEST_COMMANDS[name], params);
 };
 
 const defineMessage = <Name extends NoteMessageName>(name: Name) => (
   params: NoteMessages[Name],
-) => {
-  rawMessages[name](encodeWireValue(params));
-};
+) => invoke<void>(MESSAGE_COMMANDS[name], params);
 
 export const noteApi = {
   bootstrap: defineRequest("bootstrap"),
@@ -80,18 +68,21 @@ export const noteApi = {
 } satisfies NoteApi;
 
 export const noteMessages = {
-  startResize: defineMessage("startResize"),
-  resizeWindow: defineMessage("resizeWindow"),
-  endResize: defineMessage("endResize"),
   setWindowDragging: defineMessage("setWindowDragging"),
+  setWindowResizing: defineMessage("setWindowResizing"),
   setDockHovered: defineMessage("setDockHovered"),
 } satisfies NoteMessageApi;
 
 export const registerFlushHandler = (handler: FlushHandler) => {
   flushPendingChanges = handler;
-};
+  if (flushListenerRegistered) return;
 
-export const onNoteChanged = (listener: SnapshotListener) => {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
+  flushListenerRegistered = true;
+  void listen("flush-pending-changes", async () => {
+    try {
+      await flushPendingChanges();
+    } finally {
+      await invoke("confirm_flush");
+    }
+  });
 };

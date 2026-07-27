@@ -39,13 +39,6 @@ button {
   border: 0;
 }
 
-button,
-label,
-input[type="checkbox"] {
-  -webkit-app-region: no-drag;
-  app-region: no-drag;
-}
-
 [hidden] {
   display: none !important;
 }
@@ -405,7 +398,7 @@ input[type="checkbox"] {
 }
 
 .text-btn:hover {
-  text-decoration: underline;
+  background: rgba(157, 116, 20, 0.08);
 }
 
 .text-btn.danger,

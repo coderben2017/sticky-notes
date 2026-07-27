@@ -1,0 +1,27 @@
+[package]
+name = "sticky-notes"
+version = "1.2.0"
+description = "轻量、常驻桌面的多窗口便签与待办工具"
+authors = ["coderben2017"]
+edition = "2021"
+
+[lib]
+name = "sticky_notes_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+chrono = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sys-locale = "0.3"
+tauri = { version = "2", features = ["tray-icon"] }
+uuid = { version = "1", features = ["v4"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.60", features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+] }

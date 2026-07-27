@@ -1,6 +1,3 @@
-import type { RPCSchema } from "electrobun";
-import type { WireValue } from "./wire";
-
 export type WindowFrame = {
   x: number;
   y: number;
@@ -9,13 +6,6 @@ export type WindowFrame = {
 };
 
 export type DockEdge = "top" | "right" | "bottom" | "left";
-
-export type ResizeEdge = DockEdge | "top-left" | "top-right" | "bottom-right" | "bottom-left";
-
-export type ScreenPoint = {
-  screenX: number;
-  screenY: number;
-};
 
 export type TodoItem = {
   id: string;
@@ -63,7 +53,7 @@ export type NoteRequests = {
     response: NoteSnapshot;
   };
   setTodoMode: {
-    params: { enabled: boolean };
+    params: { enabled: boolean; copyContent: boolean };
     response: NoteSnapshot;
   };
   hideWindow: {
@@ -115,51 +105,13 @@ export type NoteApi = {
 };
 
 export type NoteMessages = {
-  startResize: ScreenPoint & { edge: ResizeEdge };
-  resizeWindow: ScreenPoint;
-  endResize: EmptyParams;
   setWindowDragging: { dragging: boolean };
+  setWindowResizing: { resizing: boolean };
   setDockHovered: { hovered: boolean };
 };
 
 export type NoteMessageName = keyof NoteMessages;
 
 export type NoteMessageApi = {
-  [Name in NoteMessageName]: (params: NoteMessages[Name]) => void;
-};
-
-type WireRequests<Requests> = {
-  [Name in keyof Requests]: Requests[Name] extends {
-    params: infer Params;
-    response: infer Response;
-  }
-    ? {
-        params: WireValue<Params>;
-        response: WireValue<Response>;
-      }
-    : never;
-};
-
-type WireMessages<Messages> = {
-  [Name in keyof Messages]: WireValue<Messages[Name]>;
-};
-
-type WebviewRequests = {
-  flushPendingChanges: {
-    params: EmptyParams;
-    response: null;
-  };
-};
-
-export type StickyNotesRPC = {
-  bun: RPCSchema<{
-    requests: WireRequests<NoteRequests>;
-    messages: WireMessages<NoteMessages>;
-  }>;
-  webview: RPCSchema<{
-    requests: WireRequests<WebviewRequests>;
-    messages: {
-      noteChanged: WireValue<NoteSnapshot>;
-    };
-  }>;
+  [Name in NoteMessageName]: (params: NoteMessages[Name]) => Promise<void>;
 };
